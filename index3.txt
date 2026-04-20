@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業と経済 ミニゲーム集 - これからの企業はどうあるべきか？</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        #app-container {
+            background-color: #fff;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4em;
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .screen { display: none; }
+        .active-screen { display: block; }
+        
+        /* メニュー画面用 */
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: opacity 0.2s;
+        }
+        .menu-btn:hover { opacity: 0.8; }
+        .bg-blue { background-color: #3498db; }
+        .bg-green { background-color: #2ecc71; }
+        .bg-purple { background-color: #9b59b6; }
+        
+        /* ゲーム画面用 */
+        .story-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .term { color: #e74c3c; font-weight: bold; background-color: #fadbd8; padding: 0 4px; border-radius: 3px; }
+        .choices { display: flex; flex-direction: column; gap: 10px; }
+        .choice-btn {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 2px solid #bdc3c7;
+            padding: 12px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .choice-btn:hover { background-color: #bdc3c7; }
+        #explanation {
+            display: none;
+            background-color: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 5px 5px 0;
+            line-height: 1.5;
+        }
+        .action-btn {
+            display: block;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .action-btn:hover { background-color: #2c3e50; }
+        .progress { font-weight: bold; color: #7f8c8d; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <h1>これからの企業はどうあるべきか？</h1>
+
+    <div id="menu-screen" class="screen active-screen">
+        <p>プレイしたいミッションを選んで、ノートの空欄を埋めよう！</p>
+        <button class="menu-btn bg-blue" onclick="startGame('game1')">MISSION 1：会社設立クイズ<br><small>〜企業の種類と仕組み〜</small></button>
+        <button class="menu-btn bg-green" onclick="startGame('game2')">MISSION 2：CEO資金運用ゲーム<br><small>〜成長と経営戦略〜</small></button>
+        <button class="menu-btn bg-purple" onclick="startGame('game3')">MISSION 3：炎上回避バランサー<br><small>〜企業の社会的責任〜</small></button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="progress" class="progress">問題 1 / 3</div>
+        <div id="story-area" class="story-text"></div>
+        <div id="choices-area" class="choices"></div>
+        <div id="explanation"></div>
+        <button id="next-btn" class="action-btn" style="display:none;" onclick="nextQuestion()">次へ</button>
+        <button id="home-btn" class="action-btn" style="display:none;" onclick="returnHome()">メニューに戻る</button>
+    </div>
+</div>
+
+<script>
+    // 3つのゲームのデータ（全用語を網羅）
+    const gamesData = {
+        // ミッション1：会社設立と形態
+        game1: [
+            {
+                q: "あなたは新しい事業を始めることにしました。国や地方公共団体が経営する<span class='term'>公企業</span>ではなく、民間人が出資する<span class='term'>私企業</span>を立ち上げます。法律上の権利・義務の主体となる<span class='term'>法人企業</span>にしたいですが、どの形態にしますか？",
+                choices: ["無限責任を負う形態にする", "広く資金を集めやすい形態にする"],
+                exp: "広く資金を集めるなら<span class='term'>株式会社</span>が最適です！他にも、無限責任社員だけの<span class='term'>合名会社</span>、無限と有限が混ざる<span class='term'>合資会社</span>、全員が有限責任の<span class='term'>合同会社</span>などの形態があります。"
+            },
+            {
+                q: "株式会社を設立しました！資金を集めるために何を発行しますか？",
+                choices: ["株式", "社債"],
+                exp: "<span class='term'>株式</span>を発行して資金を集めます。これでお金を出してくれた人を<span class='term'>株主</span>と呼びます。株主は、出資額以上の責任を負わない<span class='term'>有限責任</span>の原則で守られています。"
+            },
+            {
+                q: "会社の最高意思決定機関である<span class='term'>株主総会</span>が開かれます。そこで、実際の経営を誰に任せるか決めることになりました。",
+                choices: ["専門のプロに任せる", "株主全員で多数決で毎日決める"],
+                exp: "現代の企業では、出資者（株主）と、実際に経営を行う<span class='term'>経営者</span>が異なる<span class='term'>所有と経営の分離</span>が進んでいます。プロに任せるのが一般的です！"
+            }
+        ],
+        // ミッション2：資金と成長
+        game2: [
+            {
+                q: "事業を拡大するためのお金が必要です。会社内部に貯まった利益（<span class='term'>内部留保</span>）や、機械の価値減少分を積み立てた<span class='term'>減価償却</span>費などの<span class='term'>内部金融</span>だけでは足りません。どうしますか？",
+                choices: ["外部から資金を調達する", "貯金が貯まるまで何年も待つ"],
+                exp: "外部から資金を集めることを<span class='term'>外部金融</span>といいます。株式を発行して集める返済不要の<span class='term'>自己資本</span>と、銀行借入や<span class='term'>社債</span>の発行で集める返済が必要な<span class='term'>他人資本</span>があります。"
+            },
+            {
+                q: "資金が集まり、会社は大きな<span class='term'>利潤</span>を出しました。この利益をどう使いますか？",
+                choices: ["株主への還元と、将来の投資に分ける", "すべて経営者の給料にする"],
+                exp: "利潤の一部は、株主へ<span class='term'>配当</span>として支払われます。残りは、新しい工場を建てる<span class='term'>設備投資</span>や、新技術の<span class='term'>研究・開発（R&D）</span>に使い、業界内での<span class='term'>市場占有率（マーケットシェア）</span>を高めます。"
+            },
+            {
+                q: "会社は巨大化し、国境を越えて活動する<span class='term'>多国籍企業</span>になりました。他社と株を持ち合う<span class='term'>株式持ち合い</span>も行っていますが、経営の効率化（<span class='term'>リストラクチャリング</span>）が必要です。どうしますか？",
+                choices: ["他社を買収したり、業務を外部に委託する", "自社だけで全部の仕事を引き受ける"],
+                exp: "他企業を買い取る<span class='term'>合併・買収（M&A）</span>や、一部業務を外部に出す<span class='term'>アウトソーシング</span>が有効です。これにより、本業以外の事業も持つ<span class='term'>複合企業（コングロマリット）</span>に成長します。巨大グループをまとめるためには、他の会社の株を保有して支配する<span class='term'>持株会社制度</span>も使われます。"
+            }
+        ],
+        // ミッション3：社会的責任とガバナンス
+        game3: [
+            {
+                q: "最近、ライバル企業でデータ改ざんの不祥事がありました。自社でも、業務が正しく行われるための<span class='term'>内部統制</span>と、経営を監視する<span class='term'>企業統治（コーポレート・ガバナンス）</span>を強化する必要があります。",
+                choices: ["法律やルールを徹底的に守らせる", "バレなければ良いと指導する"],
+                exp: "企業が法律や社会のルールを守ることを<span class='term'>法令遵守（コンプライアンス）</span>といいます。また、投資家などに正しい情報を公開する<span class='term'>企業情報の開示（ディスクロージャー）</span>を行うことで、会社の信頼が保たれます。"
+            },
+            {
+                q: "企業は利益を出すだけでなく、社会の一員としての責任（<span class='term'>企業の社会的責任：CSR</span>）を果たすことが求められます。従業員、消費者、地域社会などの関係者（<span class='term'>ステークホルダー</span>）のために何をしますか？",
+                choices: ["文化支援や、多様な人材の採用を行う", "利益が出ない活動は一切やめる"],
+                exp: "文化・芸術を支援する<span class='term'>メセナ</span>や、社会貢献活動である<span class='term'>フィランソロピー</span>が重要です。また、性別や国籍など多様な人材を活用する<span class='term'>ダイバーシティ</span>の推進も、現代の企業に欠かせません。"
+            },
+            {
+                q: "世の中には、貧困や環境問題など、普通のビジネスでは解決しにくい課題があります。利益だけでなく、こうした社会的課題の解決そのものを「目的」とした事業を始めたいと考えています。",
+                choices: ["ソーシャルビジネスを立ち上げる", "国が解決するのを待つ"],
+                exp: "社会的課題の解決を目的とする事業を<span class='term'>ソーシャルビジネス</span>と呼び、それを立ち上げる人を<span class='term'>社会起業家</span>と言います。<br><br><strong>★全ミッション完了！</strong><br>これらの知識を踏まえて、学習課題『これからの企業はどうあるべきか？』をノートに書きましょう！"
+            }
+        ]
+    };
+
+    let currentGameData = [];
+    let currentQuestionIndex = 0;
+
+    function startGame(gameId) {
+        currentGameData = gamesData[gameId];
+        currentQuestionIndex = 0;
+        
+        document.getElementById('menu-screen').classList.remove('active-screen');
+        document.getElementById('game-screen').classList.add('active-screen');
+        
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const qData = currentGameData[currentQuestionIndex];
+        
+        document.getElementById('progress').innerText = `進行度: ${currentQuestionIndex + 1} / ${currentGameData.length}`;
+        document.getElementById('story-area').innerHTML = qData.q;
+        
+        const choicesArea = document.getElementById('choices-area');
+        choicesArea.innerHTML = '';
+        
+        qData.choices.forEach(choiceText => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = choiceText;
+            btn.onclick = () => selectChoice(qData.exp);
+            choicesArea.appendChild(btn);
+        });
+
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('home-btn').style.display = 'none';
+    }
+
+    function selectChoice(expHTML) {
+        const btns = document.querySelectorAll('.choice-btn');
+        btns.forEach(btn => btn.disabled = true);
+
+        const expDiv = document.getElementById('explanation');
+        expDiv.innerHTML = "<strong>【解説・用語確認】</strong><br>" + expHTML;
+        expDiv.style.display = 'block';
+
+        if (currentQuestionIndex < currentGameData.length - 1) {
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            document.getElementById('home-btn').style.display = 'block';
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        showQuestion();
+    }
+
+    function returnHome() {
+        document.getElementById('game-screen').classList.remove('active-screen');
+        document.getElementById('menu-screen').classList.add('active-screen');
+    }
+</script>
+</body>
+</html>
