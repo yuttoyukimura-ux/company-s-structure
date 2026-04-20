@@ -162,6 +162,38 @@
     // 全用語網羅のシナリオデータ
     const scenarios = [
         {
+            title: "Phase 0: 起業前夜（ターゲット選定）",
+            story: "あなたは起業を考えている。ビジネスの基本は、経済の血液であるお金の流れを掴み、<span class='term'>利潤</span>を生み出すことだ。まずはターゲットを決めよう。",
+            choices: [
+                {
+                    text: "A: 一般の消費者に向けた商品を作る",
+                    effect: { funds: -10, share: +20, trust: 0 },
+                    result: "一般の<span class='term'>家計</span>に向けて、生活を豊かにする<span class='term'>消費財</span>（スマホや家電など）を作ることにした。認知度は上がりやすいが、消費者の財布の紐に大きく左右される。"
+                },
+                {
+                    text: "B: 他の企業に向けた商品を作る",
+                    effect: { funds: +10, share: -10, trust: +10 },
+                    result: "他の企業に向けて、彼らが<span class='term'>設備投資</span>に使うための<span class='term'>生産財</span>（産業用ロボットや部品など）を作ることにした。地味だが手堅いビジネスモデルだ。"
+                }
+            ]
+        },
+        {
+            title: "Phase 0.5: マクロ経済の波を読む",
+            story: "いよいよ事業開始だ。国や自治体が整備した道路や港湾といった<span class='term'>社会資本</span>を活用して物流コストを抑えよう。しかし、世間の景気は不安定だ。どのような価格設定で勝負に出る？",
+            choices: [
+                {
+                    text: "A: 不景気に備え、低価格な節約向け製品をメインにする",
+                    effect: { funds: +10, share: 0, trust: +10 },
+                    result: "株価下落などで消費者が貧しくなったと感じる<span class='term'>逆資産効果</span>により、<span class='term'>家計</span>は<span class='term'>所得</span>を消費ではなく<span class='term'>貯蓄</span>に回し始めていた。低価格路線は大成功し、安定したスタートを切った！"
+                },
+                {
+                    text: "B: 好景気を信じ、高価格なプレミアム製品をメインにする",
+                    effect: { funds: -20, share: +20, trust: 0 },
+                    result: "給料が上がれば消費が増える<span class='term'>消費所得効果</span>や、株高で豊かになったと感じる<span class='term'>資産効果</span>に賭けた！ハイリスクだったが、富裕層の心を見事に掴み、一気に市場を席巻した！"
+                }
+            ]
+        },
+        {
             title: "Phase 1: 創業（どんな会社を作る？）",
             story: "国や自治体の<span class='term'>公企業</span>ではなく、民間人が出資する<span class='term'>私企業</span>を立ち上げる。事業を行うため、法律上の権利義務の主体となる<span class='term'>法人企業</span>にしたい。どんな形態を選ぶべきか？",
             choices: [
